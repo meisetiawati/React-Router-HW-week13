@@ -54,10 +54,7 @@ export default function BookDetails() {
       ) : (
         <Flex my="6">
           <Box w="300px">
-            <Image
-              src={`http://localhost:8000/${book.image}`}
-              alt={book.title}
-            />
+            <Image src={`http://localhost:8000/${book.image}`} alt={book.title} />
           </Box>
           <Box ml="8">
             <Heading as="h1" size="lg">

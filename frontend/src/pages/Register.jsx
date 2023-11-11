@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   FormControl,
-  FormErrorMessage,
   FormLabel,
   Input,
   Text,
@@ -11,26 +10,20 @@ import {
   useNavigate
 } from "@chakra-ui/react";
 import { registerUser } from "../modules/fetch";
-import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [credentials, setCredentials] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
+    if (credentials.password !== credentials.confirmPassword) {
       return;
     }
     try {
-      await registerUser(
-        e.target.name.value,
-        e.target.email.value,
-        password
-      );
+      await registerUser(credentials.name, credentials.email, credentials.password);
       toast({
         title: "Registered",
         description: "You have successfully registered.",
@@ -40,16 +33,16 @@ const Register = () => {
       });
       navigate("/");
     } catch (e) {
-      const error = new Error(e);
+      const errorMessage = e?.message || "An error occurred. Please try again.";
       toast({
         title: "An error occurred.",
-        description: error?.message || "An error occurred. Please try again.",
+        description: errorMessage,
         status: "error",
         duration: 3000,
         isClosable: true,
       });
+      setError(errorMessage);
     }
-    setError(error?.message || "An error occurred");
   };
 
   return (
@@ -68,7 +61,12 @@ const Register = () => {
 
           <FormControl isRequired>
             <FormLabel>Name</FormLabel>
-            <Input type="name" name="name" placeholder="Enter your mame" />
+            <Input
+              type="name"
+              name="name"
+              placeholder="Enter your name"
+              onChange={(e) => setCredentials({ ...credentials, name: e.target.value })}
+            />
           </FormControl>
 
           <FormControl isRequired>
@@ -77,6 +75,7 @@ const Register = () => {
               type="email"
               name="email"
               placeholder="Enter your email address"
+              onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
             />
           </FormControl>
 
@@ -85,8 +84,8 @@ const Register = () => {
             <Input
               type="password"
               placeholder="Enter a password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={credentials.password}
+              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
             />
           </FormControl>
 
@@ -95,10 +94,10 @@ const Register = () => {
             <Input
               type="password"
               placeholder="Confirm your password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={credentials.confirmPassword}
+              onChange={(e) => setCredentials({ ...credentials, confirmPassword: e.target.value })}
             />
-            {password !== confirmPassword && (
+            {credentials.password !== credentials.confirmPassword && (
               <Text fontSize="xs" color="red.500">
                 The password does not match
               </Text>

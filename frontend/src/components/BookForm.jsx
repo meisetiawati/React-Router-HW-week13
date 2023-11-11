@@ -1,21 +1,14 @@
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  Image,
-  Input,
-  useToast,
-  VStack,
-} from "@chakra-ui/react";
+import { Button, FormControl, FormLabel, Image, Input, useToast, VStack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { createBook, editBook, deleteBook } from "../modules/fetch"; 
 
 export default function BookForm({ bookData, isEdit, onDelete }) {
   const toast = useToast();
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(bookData?.image ? `http://localhost:8000/${bookData.image}` : null);
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     if (!selectedImage && !isEdit) {
       toast({
         title: "Error",
@@ -26,17 +19,12 @@ export default function BookForm({ bookData, isEdit, onDelete }) {
       });
       return;
     }
+
     const formData = new FormData(event.target);
-    if (isEdit) {
-      try {
-        await editBook(
-          bookData.id,
-          formData.get("title"),
-          formData.get("author"),
-          formData.get("publisher"),
-          parseInt(formData.get("year")),
-          parseInt(formData.get("pages"))
-        );
+
+    try {
+      if (isEdit) {
+        await editBook(bookData.id, ...formData.values());
         toast({
           title: "Success",
           description: "Book edited successfully",
@@ -44,19 +32,10 @@ export default function BookForm({ bookData, isEdit, onDelete }) {
           duration: 5000,
           isClosable: true,
         });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: error.response.data.message || "Something went wrong",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    } else {
-      try {
+      } else {
         await createBook(formData);
         event.target.reset();
+        setSelectedImage(null);
         toast({
           title: "Success",
           description: "Book created successfully",
@@ -64,16 +43,15 @@ export default function BookForm({ bookData, isEdit, onDelete }) {
           duration: 5000,
           isClosable: true,
         });
-        setSelectedImage("");
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: error.response.data.message || "Something went wrong",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
       }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.response?.data.message || "Something went wrong",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   }
 
@@ -91,7 +69,7 @@ export default function BookForm({ bookData, isEdit, onDelete }) {
     } catch (error) {
       toast({
         title: "Error",
-        description: error.response.data.message || "Something went wrong",
+        description: error.response?.data.message || "Something went wrong",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -101,7 +79,7 @@ export default function BookForm({ bookData, isEdit, onDelete }) {
 
   useEffect(() => {
     if (bookData?.image) {
-      setSelectedImage(`http://localhost:8000/${bookData?.image}`);
+      setSelectedImage(`http://localhost:8000/${bookData.image}`);
     }
   }, [bookData]);
 
@@ -109,56 +87,29 @@ export default function BookForm({ bookData, isEdit, onDelete }) {
     <form onSubmit={handleSubmit}>
       <VStack spacing={4} bg="#EDEAF1" w="600px" h="1050px" p="6" borderRadius="10px" marginBottom="30px">
         <FormControl>
-          <FormLabel fontWeight='bold' >Title</FormLabel>
-          <Input name="title" required defaultValue={bookData?.title}
-          borderWidth="2px"
-          borderBottomWidth="4px"
-          borderColor="black" />
+          <FormLabel fontWeight="bold">Title</FormLabel>
+          <Input name="title" required defaultValue={bookData?.title} borderWidth="2px" borderBottomWidth="4px" borderColor="black" />
         </FormControl>
         <FormControl>
-          <FormLabel fontWeight='bold'>Author</FormLabel>
-          <Input name="author" required defaultValue={bookData?.author}
-          borderWidth="2px"
-          borderBottomWidth="4px"
-          borderColor="black" />
+          <FormLabel fontWeight="bold">Author</FormLabel>
+          <Input name="author" required defaultValue={bookData?.author} borderWidth="2px" borderBottomWidth="4px" borderColor="black" />
         </FormControl>
         <FormControl>
-          <FormLabel fontWeight='bold'>Publisher</FormLabel>
-          <Input name="publisher" required defaultValue={bookData?.publisher} 
-          borderWidth="2px"
-          borderBottomWidth="4px"
-          borderColor="black"/>
+          <FormLabel fontWeight="bold">Publisher</FormLabel>
+          <Input name="publisher" required defaultValue={bookData?.publisher} borderWidth="2px" borderBottomWidth="4px" borderColor="black" />
         </FormControl>
         <FormControl>
-          <FormLabel fontWeight='bold'>Year</FormLabel>
-          <Input
-            name="year"
-            type="number"
-            required
-            defaultValue={bookData?.year}
-            borderWidth="2px"
-            borderBottomWidth="4px"
-            borderColor="black"
-          />
+          <FormLabel fontWeight="bold">Year</FormLabel>
+          <Input name="year" type="number" required defaultValue={bookData?.year} borderWidth="2px" borderBottomWidth="4px" borderColor="black" />
         </FormControl>
         <FormControl>
-          <FormLabel fontWeight='bold'>Pages</FormLabel>
-          <Input
-            name="pages"
-            type="number"
-            required
-            defaultValue={bookData?.pages}
-            borderWidth="2px"
-            borderBottomWidth="4px"
-            borderColor="black"
-          />
+          <FormLabel fontWeight="bold">Pages</FormLabel>
+          <Input name="pages" type="number" required defaultValue={bookData?.pages} borderWidth="2px" borderBottomWidth="4px" borderColor="black" />
         </FormControl>
-        {selectedImage && (
-          <Image w={64} src={selectedImage} alt="Selected Image" />
-        )}
+        {selectedImage && <Image w={64} src={selectedImage} alt="Selected Image" />}
         {!bookData?.image && (
           <FormControl>
-            <FormLabel fontWeight='bold'>Image</FormLabel>
+            <FormLabel fontWeight="bold">Image</FormLabel>
             <Input
               name="image"
               type="file"
@@ -173,7 +124,9 @@ export default function BookForm({ bookData, isEdit, onDelete }) {
             />
           </FormControl>
         )}
-        <Button bg="#62BCFD" type="submit">{isEdit ? "Edit Book" : "Create Book"}</Button>
+        <Button bg="#62BCFD" type="submit">
+          {isEdit ? "Edit Book" : "Create Book"}
+        </Button>
         {isEdit && (
           <Button colorScheme="red" onClick={handleDelete}>
             Delete Book

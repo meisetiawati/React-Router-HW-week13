@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function ImageUploader() {
+export default function ImageUploader({ bookData, setBookData }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (bookData?.image) {
-      const file = new File([], bookData.image, { type: 'image/*' });
-      setSelectedImage(URL.createObjectURL(file));
+      setSelectedImage(URL.createObjectURL(bookData.image));
       fileInputRef.current.value = '';
     }
   }, [bookData]);
@@ -18,7 +17,7 @@ export default function ImageUploader() {
 
     setBookData((prevData) => ({
       ...prevData,
-      image: file.name,
+      image: file,
     }));
   }
 

@@ -1,20 +1,10 @@
 import { useState } from 'react';
-import {
-  Box,
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  Text,
-  useToast,
-} from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, Text, useToast } from '@chakra-ui/react';
 import { loginUser } from '../modules/fetch';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const toast = useToast();
@@ -22,7 +12,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await loginUser(email, password);
+      await loginUser(credentials.email, credentials.password);
       toast({
         title: 'Login Successful',
         description: 'You have successfully logged in.',
@@ -32,17 +22,16 @@ const Login = () => {
       });
       navigate('/');
     } catch (e) {
-      const error = new Error(e);
+      const errorMessage = e?.message || 'Login failed. Please check your credentials.';
       toast({
         title: 'Login Failed',
-        description:
-          error?.message || 'Login failed. Please check your credentials.',
+        description: errorMessage,
         status: 'error',
         duration: 3000,
         isClosable: true,
       });
+      setError(errorMessage);
     }
-    setError(error?.message || 'Login failed');
   };
 
   return (
@@ -65,7 +54,7 @@ const Login = () => {
               type="email"
               name="email"
               placeholder="Enter your email address"
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
             />
           </FormControl>
 
@@ -74,8 +63,8 @@ const Login = () => {
             <Input
               type="password"
               placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={credentials.password}
+              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
             />
           </FormControl>
 
