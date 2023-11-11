@@ -18,7 +18,7 @@ import {
   VStack,
   useNavigate,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../modules/fetch";
 
@@ -27,13 +27,6 @@ const Navbar = () => {
   const [isLogin, setIsLogin] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = window.localStorage.getItem("token");
-    if (token) {
-      setIsLogin(true);
-    }
-  }, [window.localStorage.getItem("token")]);
 
   return (
     <Flex
@@ -56,19 +49,18 @@ const Navbar = () => {
       </Link>
       <HStack>
         {isLogin && (
-          <>
           <Link to="/newbook">
             <Button bg="#93C0F6">Create New Book</Button>
           </Link>
-        </>
-      )}
+        )}
         {!isLogin ? (
-          <Button 
-          bg="#62BCFD"
-          _hover={{ bg: '#E6C0C0' }}
-          onClick={onOpen}
-          flex="1"
-          mx="auto">
+          <Button
+            bg="#62BCFD"
+            _hover={{ bg: '#E6C0C0' }}
+            onClick={onOpen}
+            flex="1"
+            mx="auto"
+          >
             Login
           </Button>
         ) : (
@@ -79,7 +71,7 @@ const Navbar = () => {
             onClick={() => {
               window.localStorage.removeItem("token");
               setIsLogin(false);
-              navigate("/")
+              navigate("/");
             }}
           >
             Logout
@@ -98,6 +90,7 @@ const Navbar = () => {
                 e.target.password.value
               );
               window.localStorage.setItem("token", token.token);
+              setIsLogin(true);
               navigate("/");
               onClose();
             } catch (err) {
@@ -116,9 +109,9 @@ const Navbar = () => {
             <ModalHeader>Login</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <VStack>
+              <VStack spacing={4}>
                 <FormControl isRequired>
-                  <FormLabel >Email</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <Input
                     name="email"
                     type="email"
